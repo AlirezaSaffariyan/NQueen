@@ -7,6 +7,7 @@ class NQueenAlgorithms:
         - Hill Climbing
         - Genetic
         - CSP
+        - CSP with MRV
     """
 
     def __init__(self, size, queens=None, max_iterations=1000, population_size=100, mutation_rate=0.1):
