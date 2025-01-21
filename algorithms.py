@@ -1,5 +1,6 @@
 import random
 
+
 class NQueenAlgorithms:
     """Class to handle n-queens algorithms.
 
@@ -10,35 +11,42 @@ class NQueenAlgorithms:
         - CSP with MRV
     """
 
-    def __init__(self, size, queens=None, max_iterations=1000, population_size=100, mutation_rate=0.1):
+    def __init__(
+        self,
+        size,
+        queens=None,
+        max_iterations=1000,
+        population_size=100,
+        mutation_rate=0.1,
+    ):
         self.size = size
         self.queens = queens if queens is not None else self.generate_random_state()
         self.max_iterations = max_iterations  # Max iterations for hill climbing
         self.population_size = population_size  # Population size for genetic algorithm
-        self.mutation_rate = mutation_rate     # Mutation rate for genetic algorithm
-        
+        self.mutation_rate = mutation_rate  # Mutation rate for genetic algorithm
+
     def csp_with_mrv_with_steps(self):
         """Solve the N-Queens problem using CSP with MRV heuristic, showing steps."""
         solution = [None] * self.size  # Initialize with None values
         steps = []
-        
+
         # Initialize domains for each column
         domains = {col: set(range(self.size)) for col in range(self.size)}
-        
+
         # Calculate middle positions
         mid_col = self.size // 2
         mid_row = self.size // 2
-        
+
         # Place the first queen in the middle
         solution[mid_col] = mid_row
         steps.append(solution[:])  # Add initial state
-        
+
         # Update domains after placing the first queen
         self.update_domains(domains, mid_col, mid_row)
-        
+
         # Generate column sequence starting from middle
         cols_sequence = self.generate_column_sequence(mid_col)
-        
+
         if self.solve_csp_mrv_with_steps(1, solution, domains, steps, cols_sequence):
             return steps
         return None
@@ -50,9 +58,13 @@ class NQueenAlgorithms:
 
         # Update the positions where queens are present
         for col, row in enumerate(self.queens):
-            if row is not None and 0 <= row < self.size:  # Check if the row is valid and not None
+            if (
+                row is not None and 0 <= row < self.size
+            ):  # Check if the row is valid and not None
                 button_index = row * self.size + col
-                if 0 <= button_index < len(self.buttons):  # Check if the button index is valid
+                if (
+                    0 <= button_index < len(self.buttons)
+                ):  # Check if the button index is valid
                     self.buttons[button_index].setText("♛")
 
     def create_state_representation(self, solution):
@@ -64,7 +76,7 @@ class NQueenAlgorithms:
         sequence = []
         left = mid - 1
         right = mid + 1
-        
+
         # Alternate between left and right sides
         while left >= 0 or right < self.size:
             if left >= 0:
@@ -73,7 +85,7 @@ class NQueenAlgorithms:
                 sequence.append(right)
             left -= 1
             right += 1
-        
+
         return sequence
 
     def create_clean_solution(self, solution, cols_sequence):
@@ -88,8 +100,7 @@ class NQueenAlgorithms:
         """Check if it's safe to place a queen at the given position with partial solution."""
         for c in range(self.size):
             if solution[c] is not None:  # Check only placed queens
-                if solution[c] == row or \
-                abs(solution[c] - row) == abs(c - col):
+                if solution[c] == row or abs(solution[c] - row) == abs(c - col):
                     return False
         return True
 
@@ -100,11 +111,11 @@ class NQueenAlgorithms:
             if other_col != col:  # Skip the current column
                 # Remove the same row
                 domains[other_col].discard(row)
-                
+
                 # Remove diagonal positions
                 diagonal_up = row + abs(other_col - col)
                 diagonal_down = row - abs(other_col - col)
-                
+
                 if diagonal_up < self.size:
                     domains[other_col].discard(diagonal_up)
                 if diagonal_down >= 0:
@@ -114,21 +125,21 @@ class NQueenAlgorithms:
         """Get the size of the domain for a given column."""
         if not solution:
             return self.size
-            
+
         valid_positions = set(range(self.size))
         for c, r in enumerate(solution):
             # Remove rows that are already taken
             valid_positions.discard(r)
-            
+
             # Remove diagonal positions
             diagonal_up = r + (col - c)
             diagonal_down = r - (col - c)
-            
+
             if diagonal_up < self.size:
                 valid_positions.discard(diagonal_up)
             if diagonal_down >= 0:
                 valid_positions.discard(diagonal_down)
-                
+
         return len(valid_positions)
 
     # New CSP MRV based method
@@ -146,7 +157,7 @@ class NQueenAlgorithms:
 
         # Get the row options for this column based on MRV
         row_options = self.get_row_options(solution, col)
-        
+
         # Sort options by MRV (fewest remaining values)
         row_options.sort(key=lambda x: len(self.get_row_options(solution, col, x)))
 
@@ -164,17 +175,19 @@ class NQueenAlgorithms:
         if row is None:  # If no specific row is given, return all valid rows
             return [r for r in range(self.size) if self.is_safe(r, col, solution)]
         else:  # Return the row options for a specific row
-            return [r for r in range(self.size) if self.is_safe(r, col, solution + [row])]
-    #new
+            return [
+                r for r in range(self.size) if self.is_safe(r, col, solution + [row])
+            ]
 
-    
+    # new
+
     def csp(self):
         """Solve the N-Queens problem using a backtracking approach."""
         solution = []
         if self.solve_csp(0, solution):
             return solution
         return None  # Return None if no solution found
-    
+
     def csp_with_steps(self):
         """Solve the N-Queens problem using a backtracking approach with steps."""
         solution = []
@@ -187,22 +200,19 @@ class NQueenAlgorithms:
         """Recursive function to solve the N-Queens problem using backtracking."""
         if col >= self.size:
             steps.append(solution[:])  # Add the complete solution
-            return True  
+            return True
 
         for row in range(self.size):
             if col == 0:
                 row = random.randint(0, 7)
             if self.is_safe(row, col, solution):
-                solution.append(row)  
+                solution.append(row)
                 steps.append(solution[:])  # Record the current state
                 if self.solve_csp(col + 1, solution, steps):
-                    return True  
-                solution.pop()  
+                    return True
+                solution.pop()
 
         return False
-
-
-    
 
     def is_safe(self, row, col, solution):
         """Check if it's safe to place a queen at (row, col)."""
@@ -211,56 +221,54 @@ class NQueenAlgorithms:
                 return False
         return True
 
-
     def hill_climbing(self):
         """Perform hill climbing algorithm to solve the n-queens problem."""
         current_state = self.queens
         current_attacks = self.heuristic(current_state)
-        
+
         neighbor_states = self.get_neighbors(current_state)
 
         # Find the best neighbor state
         best_state = min(neighbor_states, key=self.heuristic)
         best_attacks = self.heuristic(best_state)
-        
+
         while best_attacks < current_attacks:
             current_state = best_state
             current_attacks = best_attacks
-            
+
             neighbor_states = self.get_neighbors(current_state)
 
             # Find the best neighbor state
             best_state = min(neighbor_states, key=self.heuristic)
             best_attacks = self.heuristic(best_state)
-            
+
         return current_state
-    
+
     def hill_climbing_with_steps(self):
         """Perform hill climbing algorithm with steps to solve the n-queens problem."""
         states = []
         current_state = self.queens
         current_attacks = self.heuristic(current_state)
-        
+
         neighbor_states = self.get_neighbors(current_state)
 
         # Find the best neighbor state
         best_state = min(neighbor_states, key=self.heuristic)
         best_attacks = self.heuristic(best_state)
-        
+
         while best_attacks < current_attacks:
             current_state = best_state
             current_attacks = best_attacks
-            
+
             neighbor_states = self.get_neighbors(current_state)
 
             # Find the best neighbor state
             best_state = min(neighbor_states, key=self.heuristic)
             best_attacks = self.heuristic(best_state)
-            
+
             states.append(current_state)
         return states
 
-    
     def get_neighbors(self, state):
         """Generate all neighbor states by moving each queen to different rows."""
         neighbors = []
@@ -270,13 +278,13 @@ class NQueenAlgorithms:
                     new_state = state[:]
                     new_state[col] = row  # Move queen to new row
                     neighbors.append(new_state)
-                    
+
         return neighbors
 
     def genetic(self):
         """Perform genetic algorithm to solve the n-queens problem."""
         population = self.initialize_population()
-        
+
         for iteration in range(self.max_iterations):
             # Sort the population by fitness (ascending)
             population.sort(key=self.heuristic)
@@ -284,7 +292,9 @@ class NQueenAlgorithms:
 
             # Create new individuals using crossover and mutation
             while len(new_population) < self.population_size:
-                parent1, parent2 = random.choices(population[:20], k=2)  # Select the top 20 for crossover
+                parent1, parent2 = random.choices(
+                    population[:20], k=2
+                )  # Select the top 20 for crossover
                 child = self.crossover(parent1, parent2)
 
                 if random.random() < self.mutation_rate:
@@ -296,15 +306,19 @@ class NQueenAlgorithms:
 
             # Check if a solution is found
             if any(self.heuristic(ind) == 0 for ind in population):
-                return next((ind for ind in population if self.heuristic(ind) == 0), None)
+                return next(
+                    (ind for ind in population if self.heuristic(ind) == 0), None
+                )
 
-        return min([ind for ind in population])  # No solution found after max iterations
+        return min(
+            [ind for ind in population]
+        )  # No solution found after max iterations
 
     def genetic_with_steps(self):
         """Perform genetic algorithm with steps to solve the n-queens problem."""
         states = []
         population = self.initialize_population()
-        
+
         for iteration in range(self.max_iterations):
             # Sort the population by fitness (ascending)
             population.sort(key=self.heuristic)
@@ -312,7 +326,9 @@ class NQueenAlgorithms:
 
             # Create new individuals using crossover and mutation
             while len(new_population) < self.population_size:
-                parent1, parent2 = random.choices(population[:20], k=2)  # Select the top 20 for crossover
+                parent1, parent2 = random.choices(
+                    population[:20], k=2
+                )  # Select the top 20 for crossover
                 child = self.crossover(parent1, parent2)
 
                 if random.random() < self.mutation_rate:
@@ -324,9 +340,11 @@ class NQueenAlgorithms:
 
             # Check if a solution is found
             if any(self.heuristic(ind) == 0 for ind in population):
-                states.append(next((ind for ind in population if self.heuristic(ind) == 0), None))
+                states.append(
+                    next((ind for ind in population if self.heuristic(ind) == 0), None)
+                )
                 return states
-            
+
         return states
 
     def initialize_population(self):
@@ -377,14 +395,18 @@ class NQueenAlgorithms:
                     attacks += 1
         return attacks
 
-    def solve_csp_mrv_with_steps(self, queens_placed, solution, domains, steps, cols_sequence):
+    def solve_csp_mrv_with_steps(
+        self, queens_placed, solution, domains, steps, cols_sequence
+    ):
         """Recursive function to solve N-Queens using CSP with MRV, recording steps."""
         if queens_placed >= self.size:
             steps.append(solution[:])  # Add final solution
             return True
 
         # Get next column to fill based on pre-computed sequence
-        col = cols_sequence[queens_placed - 1]  # -1 because first queen is already placed
+        col = cols_sequence[
+            queens_placed - 1
+        ]  # -1 because first queen is already placed
 
         # Try each possible row in the domain of this column
         for row in sorted(domains[col]):
@@ -392,46 +414,49 @@ class NQueenAlgorithms:
                 # Place the queen
                 solution[col] = row
                 steps.append(solution[:])  # Record the step
-                
+
                 # Save current domains
                 old_domains = {k: v.copy() for k, v in domains.items()}
-                
+
                 # Update domains for remaining columns
                 self.update_domains(domains, col, row)
-                
+
                 # Recur with next queen
-                if self.solve_csp_mrv_with_steps(queens_placed + 1, solution, domains, steps, cols_sequence):
+                if self.solve_csp_mrv_with_steps(
+                    queens_placed + 1, solution, domains, steps, cols_sequence
+                ):
                     return True
-                
+
                 # Backtrack
                 solution[col] = None
                 steps.append(solution[:])  # Record backtracking
                 domains.update(old_domains)  # Restore domains
-        
+
         return False
 
     def get_attacking_positions(self, state):
         """Get all positions under attack by queens."""
         attacking_positions = set()
-        
+
         for col1 in range(self.size):
             row1 = state[col1]
             if row1 is None:  # Skip if no queen in this column
                 continue
-            
+
             # Check horizontal and diagonal attacks
             for col2 in range(self.size):
                 if col1 == col2:
                     continue
-                
+
                 row2 = state[col2]
                 if row2 is None:  # Skip if no queen in this column
                     continue
-                
+
                 # Check if queens are attacking each other
-                if (row1 == row2 or  # Same row
-                    abs(row1 - row2) == abs(col1 - col2)):  # Diagonal
+                if row1 == row2 or abs(row1 - row2) == abs(  # Same row
+                    col1 - col2
+                ):  # Diagonal
                     attacking_positions.add((row1, col1))
                     attacking_positions.add((row2, col2))
-                
+
         return attacking_positions
